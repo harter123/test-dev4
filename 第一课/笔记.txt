@@ -1,0 +1,146 @@
+摩登海贼， 广东人，不吃福建人， 我在深圳这边工作，现在跟虫师啊其实同事来的，
+虫师的工位就在我隔壁
+
+开发为主，我的技术栈主要是vue  django  mysql  tornado  python
+
+django 生态非常健全，各种组件非常完善
+tornado精而细，flask有些相似，比较大的特点，就是异步编程，涉及到协程，性能是非常好的。
+
+协程：可以它是用户级别的线程
+
+
+上课模式：
+上课50分钟，后面5-10分钟的休息和提问
+
+讲课的过程中，大家有疑问，也可以及时提出来，我觉得价值的，会马上回答
+前期的一个月，都是在讲基础
+vue 基础，基于的语法
+v-if v-for 路由  组件  事件方面的定义
+
+django  基础， 框架的搭建，接口的定义规则这样
+restful的来定义
+第一个 参数的校验， 接口的定义  我这边会有一套特定的规则，跟虫师这边有比较大的区别
+
+前端分离的：我这边是不会用到django的模型的，django这边仅仅是作为我的api请求，不涉及页面
+所以我们会有两个程序：
+1. vue 这个就是前端的程序，专门处理html页面
+2. django  这个是专门处理api接口，数据方面的
+
+目标也是做一个接口测试平台，跟虫师差不多，页面我也会参考虫师，尽量做成跟虫师差不多
+1. 基础： 
+	1.1主要的vue的基础
+	1.2.django的后端的接口定义规则， 参数检验模块
+
+2. 登录模块
+3. 服务模块，接口模块，任务模块
+4. 任务的执行，这个可能涉及pytest
+5. vue的打包发布了
+6. 前后端正式产线部署
+
+
+
+课程的技术栈：
+1. 开发环境：
+pycharm（python）  +  webstorm（vue），默认已经支持vue的
+
+2. 需要掌握的知识：
+ js,css, html, ajax, python, django, git, vue
+
+3.额外的工具： nginx（web端的代理器，专门负责路径分发）， 主要是用来部署我们的程序
+
+vue （8080）
+django （8000）
+
+浏览器访问的时候，肯定是先访问前端（localhost:8080） 获取具体的数据是访问后端（localhost:8000）
+那么这样就存在了一个跨域的问题：
+在同一个页面，存在着访问不同的域名的请求。
+怎么判断同一个域名：同样的 域名，同样的端口，同样的请求方式
+
+浏览器无论访问前端还是后端，都是请求 localhost:80(nginx 服务)，这样浏览器就不存在着跨域的问题了
+只要我们在nginx配置好前端路径和后端的路径分别转发到 8080 或者 8000 就ok啦。
+
+
+简单介绍一下vue： https://cn.vuejs.org/v2/guide/
+一个前端的框架，专门写html的代码
+绑定性
+响应性和实时性
+组件性
+
+控件库： element-ui
+
+创建vue的项目：
+1. 安装nodejs,一定要用稳定版，官网上就有
+装完后自动会有两个程序  node， npm 
+
+2. 安装vue的脚手架：
+安装vue-cli:  npm install  -g @vue/cli 
+
+npm config set registry https://registry.npm.taobao.org
+// （如果比较慢，配置这个taobao的源，这个比较快，然后在执行安装的命令）
+
+
+3. 直接在命令里面创建vue或者是webstorm里面创建
+
+vue create 项目名称
+选择一下特性，当然也可以选择默认
+执行vue： npm run serve
+
+4.vue 项目引入element-ui:
+ npm i element-ui -S 安装
+ 
+ 在 main.js 中写入以下内容：
+
+import Vue from 'vue';
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import App from './App.vue';
+
+Vue.use(ElementUI);
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
+
+5.安装axios，用来发送http请求（ajax）
+npm install axios -S
+https://www.kancloud.cn/yunye/axios/234845
+
+前端的命名规则是  驼峰式    getData
+后端的命名规则是  斜杠式    get_data
+
+
+vue的绑定性：
+相互绑定  控件和变量   一方改变了， 另一方也跟着改变，而且是马上的响应
+
+组件性：
+把一个页面按照逻辑拆分为不同的小的页面当做一个组件
+可以理解为，一个大的页面是由很多个小的组件构建起来的
+同时一个组件，也可以被多个页面进行引用，提高了它的复用性
+
+
+介绍一下vue的目录结构：
+1. package.json 主要是说明项目的一些信息，依赖文件，命令定义等
+devDependencies  这个项目，在开发过程中所依赖的包
+dependencies  这个项目，在部署时候需要依赖的包
+
+2. node_modules 已经安装的依赖包
+
+3. public 主要是放一些外部的静态文件  以及 index程序的入口文件
+
+4. src主要的代码文件
+	assets 资源文件
+	components 组件的文件，可复用的组件，都放在这里
+	router 路由定义
+	views 非常大的页面文件，就是一些不可复用的组件
+	
+	App.vue  最顶级的组件，可以理解为一个公共的框，所有的组件，页面，都是包含这个框下面，
+	         入口vue文件，后面所有的页面都是从这个页面延伸出来
+			 是项目所有页面的父组件，所有的页面都是从这个文件延伸出来的
+			 类似于母版的概念
+	main.js  项目的主文件，可以理解为 c语言的main()
+
+
+
+
+
