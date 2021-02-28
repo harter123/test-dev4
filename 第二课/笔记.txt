@@ -1,0 +1,108 @@
+大纲：
+1.介绍vue文件格式
+2.介绍vue的语法
+
+
+vue的文件格式：
+1. 三层结构：html + js + css
+html: 固定格式，必须要有一个template，而且template下面只能有一个div
+<template>
+   <div>
+	xxxxx  这里就随便怎么写都行
+   </div>
+</template>
+
+下面就不合法了，因为有两个div在template下面
+<template>
+   <div>
+	xxxxx  这里就随便怎么写都行
+   </div>
+   <div>
+   </duv>
+</template>
+
+2.js部分：包含在<script></script>下面
+export default {  这个部分是固定的
+}
+把这个理解为一个class，就是python里面的类
+
+写一个python的类
+
+class  about：
+   def __init__(self.msg):
+       self.a = 1
+	   self.b = 2
+	   
+   def m1(self):
+       pass
+
+<script>
+    export default {
+        name: 'about',  # class的名称
+        props: {        # class的初始化参数，也就是  __init__里面的参数
+            msg: String
+        },
+        data(){         # 类的成员变量
+            return{
+                a: 1,
+				b: 2,
+            }
+        },
+        methods:{       # 类里面的成员函数
+            m1(){
+
+            }
+        },
+        create(){       # 代表 __init__ 这个函数，就是初始化函数
+
+        }
+    }
+</script>
+
+
+3. css:  scoped代表是这个css只作用于当前文件
+<style scoped>
+    .mycss {
+        
+    }
+</style>
+
+
+
+vue的基础语法
+
+1. 数据的展示
+{{ message }} 大括号包含变量
+<div v-html="htmlMessage"></div>  把变量解析成为html代码
+
+2.属性： 主要是用来给组件传递参数
+:属性名称="变量"
+
+3. 指令  都是放在某个标签里面，当做一个属性来运用
+v-if  v-else v-else-if
+   if
+   elif
+   else
+ 
+   v-if="变量"  如果这个变量是true  则当前html代码就渲染出来，否则就不渲染
+v-show  
+   v-if="变量"  如果这个变量是true  则当前html就展示（display: true），否则就隐藏（display: none）,通过设置css来实现展示和隐藏
+
+v-if  v-show  如果经常性需要进行展示隐藏切换，我们就用v-show  其他都可以用v-if(开销比较大)
+
+v-for  一个for循环   类比python的 for i in list
+
+4. 事件处理
+@+事件名称="发生事件时候的处理函数"
+<el-button @click="buttonEvent">vue button</el-button>
+@click @change @select @focus 还有很多各种事件，不同的组件有不同事件
+
+
+5. 表单绑定 v-model ：把一个变量绑定到一个表单里面去，跟表单的值进行双向绑定，
+一方改变，另一方跟着同步改变，变量和表单的值永远保持一致。
+
+<input>  表单的值就是我们输入的文本
+<select>  表单的值就是我们选择的那个选项
+<radio>   表单的值就是我们选择的那个选项
+<checkbox>  表单的值就是我们选择的那个选项
+双向绑定
