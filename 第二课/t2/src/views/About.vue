@@ -56,14 +56,21 @@
         <el-checkbox label="复选框 C"></el-checkbox>
       </el-checkbox-group>
     </div>
+
+    <aboutChildComponent :reason="reasonOfLate" ref="aboutChildV1"
+                         @callback="callbackfunc"></aboutChildComponent>
   </div>
 </template>
 
 <script>
+    import aboutChild from "@/views/aboutChild";
     export default {
         name: 'about',
         props: {
             msg: String
+        },
+        components: {
+          aboutChildComponent: aboutChild //key: value
         },
         data(){
             return{
@@ -79,15 +86,24 @@
                 modelInput: "dkdkdkdkd",
                 modelSelect: "选项1的值",
                 modelRadio: "1",
-                modelCheckList: ['复选框 A', '复选框 C']
+                modelCheckList: ['复选框 A', '复选框 C'],
+
+                reasonOfLate: "webstorm出问题了啊",
             }
         },
         methods:{
             m1(){
 
             },
+            callbackfunc(p){
+              alert('callback' + p)
+            },
             buttonEvent(){
                 alert(this.modelInput + "-" + this.modelSelect+ "-" + this.modelRadio +'-' +this.modelCheckList)
+              this.reasonOfLate = "haizei睡晚啦"
+
+              alert(this.$refs.aboutChildV1.a)
+
             },
             focusEvent(){
                 alert('focus input')

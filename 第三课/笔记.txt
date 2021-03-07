@@ -1,0 +1,126 @@
+大纲：
+1. vue的组件调用，包括数据传递以及自定义事件
+2. 介绍vue里面的路由
+
+到这里，vue的基础就到此结束啦，后面就是正式做项目了
+
+组件：就是一个可用的代码块，vue里面就是一个独立的vue文件
+
+
+如何使用组件：
+1. 创建组件
+2. 在父组件里面导入子组件
+import xxx  from xxxx
+3. 在父组件里面的components进行注册
+components
+专门用来注册子组件
+
+components: {
+          aboutChild: aboutChild //key: value
+        },   key可以定义为任何的名称
+4. 把子组件的key当做是标签来使用
+
+
+父子组件如何传递参数
+
+1. 在子组件里面props定义接受的参数：
+props: {
+    reason: {
+      type: String,
+      required: true
+    }
+  }
+ 这里面就定义一个参数reason，类型是字符串，而且必填的
+ 
+2. 我们就在父组件里面，把数据传递到这个参数里面，使用属性的传递方式
+<aboutChildComponent :reason="reasonOfLate"></aboutChildComponent>
+
+ props: {
+    reason: {
+      type: String,
+      required: true
+    }
+  },
+  data(){
+    return {
+      a: "ccc"
+    }
+  }
+props 和 data里面的参数都是属于组件的变量，都可以使用{{}}这种方式展示在html里面，地位是同等
+不同的是 props里面的数据是只读的
+
+
+父组件和子组件之间的属性和函数直接调用：
+
+父组件能不能直接调用子组件里面的函数呢， 怎么做
+1. 子组件定义一个ref属性，这个是vue层面的id，唯一标识
+2. 在父组件使用  this.$refs.子组件的ref.子组件的函数(变量)
+
+子组件能不能直接调用父组件里面的函数呢， 怎么做
+1. 在子组件使用  this.$parent.父组件的函数(变量)
+
+如何进行自定义事件
+1. 在子组件对应的逻辑执行 this.$emit(事件的名称, 参数)
+2  在父组件 使用 @事件名称=“事件回调函数”
+事件回调函数（参数）{   这么定义
+}
+
+这个用处非常的大，基本上父子组件之间的数据传递用的方式是
+props（父组件给子组件传递参数） + 自定义事件来实现的（子组件给父组件传递参数）
+
+
+vue的路由实现
+
+路由：
+1. 每一段路由定义都是附带上一个组件（页面）
+比如说django ('/text', getText)
+vue也类似：
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: Home,
+    children: [
+      {
+        path: 'a',
+        name: 'a',
+        component: () => import(/* webpackChunkName: "about" */ '../views/aboutChild.vue'),
+		chidlren：[]
+      },
+      {
+        path: 'b',
+        name: 'b',
+        component: () => import(/* webpackChunkName: "about" */ '../views/aboutChildNew.vue'),
+		chidlren：[]
+      },
+    ]
+  },
+]
+	
+2. vue的路由是分段式
+上面这个代码定义两个路由
+/ + a === /a 这样的两段路由组合在一起
+/ + b === /b
+需要从顶级到最底级才能够确定一个路由
+所以有多少叶子结点，就是有多少个路由
+
+/a 这个路由的页面是等于  / 段的home组件 + a段的 aboutChild
+/b 这个路由的页面等于    / 段的home组件 + b段的 aboutChildNew
+
+他们路由是怎么相加组装页面的：
+比如 访问"/a"： 先访问home组件，然后把aboutChild页面替代home里面的<router-view/>
+比如 访问"/b"： 先访问home组件，把aboutChildNew替代home里面的<router-view/>
+
+
+这里实际上还隐藏了一个最顶级的组件 app.vue
+"/a" 实际上是  app.vue +  home + aboutChild
+"/b" 实际上是  app.vue +  home + aboutChildNew
+
+把App.vue理解为一棵树的根节点就很贴切了
+
+
+延伸了一个问题：
+假如上面的home组件，没有<router-view/>，会怎么办
+答案： 就是仅仅有home页面，没有了aboutchild这个组件
+	
+
