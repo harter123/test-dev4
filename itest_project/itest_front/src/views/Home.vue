@@ -16,11 +16,11 @@
         </div>
       </div>
       <div class="loginForm">
-<h2>
-  itest platform
-</h2>
+        <h2>
+          itest platform
+        </h2>
         <div>
-          <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="5px" class="demo-ruleForm">
+          <el-form :model="ruleForm" :rules="rules" ref="ruleFormRef" label-width="5px" class="demo-ruleForm">
             <el-form-item label="" prop="name">
               <el-input v-model="ruleForm.name" placeholder="Enter your username"></el-input>
             </el-form-item>
@@ -28,7 +28,7 @@
               <el-input show-password v-model="ruleForm.psw" placeholder="Enter your password"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="success" style="width: 100%">Get Stared</el-button>
+              <el-button type="success" style="width: 100%" @click="submitForm">Get Started</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -60,14 +60,28 @@ export default {
       rules: {
         name: [
           { required: true, message: 'Enter your username', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
         psw: [
           { required: true, message: 'Enter your password', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
       }
     }
   },
   components: {
+  },
+  methods:{
+    submitForm() {
+      this.$refs.ruleFormRef.validate((valid) => {
+        if (valid) {
+          alert('submit!');
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
   }
 }
 </script>

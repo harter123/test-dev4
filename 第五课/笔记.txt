@@ -1,0 +1,296 @@
+大纲：
+1.element-form的表单使用
+2.前后端的跨域问题说明
+3.实现登录模块的api
+
+element-ui的使用技巧，一定要去看官方文档，代码粘贴复制就可以了，没啥难度，只要细心就好
+
+vue里面的id设置方式是 ref="ruleFormRef"
+获取vue里面的控件对象： this.$refs.ruleFormRef  这个就是vue里面的控件对象
+
+这个就是调用表单对象的validate函数进行参数检验
+this.$refs.ruleFormRef.validate((valid) => {
+        if (valid) {
+          alert('submit!');
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+	  
+实际上是因为所有的vue控件的ref都是保存在$refs下面：
+这里有一个vue对象：
+{
+	"$refs": { # 收集了所有的定了ref的控件
+		"ruleFormRef": 控件对象1
+		"roleFormBt": 控件对象2,
+		"roleFormdiv": 控件对象3,
+	}
+}
+this.$refs.某个控件的ref  
+
+
+为什么会有跨域问题呢：
+   是否跨域，取决于浏览器，如果浏览器在同一个页面，跟两个以上的域名打交道，就是跨域
+
+
+关于跨域的问题：  为什么会有这个，想想钓鱼网站，你点击一个图片，说不定就会去给人家转了钱
+
+不同的域名之间进行请求通信，会出触发跨域问题：
+在当前域名页面，请求其他的域名的接口，用来更新当前域名的数据，然后页面还是当前域名
+
+
+比如说我们现在访问前端 localhost:8080 然后我们页面请求了一个后端localhost:8000的接口，
+这样是肯定会失败的，这样触发了一个跨域问题
+
+xxx.com 实际上也是有一个端口的，只是隐藏了80这个端口
+https的网页，也是有端口的，只是隐藏了443这个端口
+
+所有的域名都是前面的域名 + 端口来组成的
+
+前端的错误信息：
+Access to XMLHttpRequest at 'http://localhost:8000/test/' from origin 'http://localhost:8080' 
+has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+
+ps：是否是跨域取决于浏览器，如果浏览器跟多个域名打交道就是跨域
+
+
+
+解决方式：
+1. 降低浏览器的安全级别，让浏览器接受跨域请求，但是这样安全性很低，不建议
+2. 在后端设置一个允许跨域的标志，那么浏览器收到了这个标志，就会忽略这个跨域问题，这个安全性也不高，也是不建议的
+3. 就是使用nginx这种第三方的代理，代理浏览器的请求，彻底解决跨域问题，非常推荐
+这种方式的关键就是，让浏览器只跟一个域名打交道就ok啦
+
+
+1. 下载nginx
+
+http://nginx.org/en/docs/windows.html
+https://www.cnblogs.com/jiangwangxiang/p/8481661.html
+
+nginx（nginx.exe） 启动nginx
+nginx -s stop	fast shutdown
+nginx -s quit	graceful shutdown
+nginx -s reload	 changing configuration, starting new worker processes with a new configuration, graceful shutdown of old worker processes
+nginx -s reopen	 re-opening log files
+
+关键的配置文件
+conf/nginx.conf
+
+
+
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    server {
+        listen       80;
+        server_name  localhost, 127.0.0.1;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+		
+		root  C:/classes/test-dev4/itest_project/itest_front/dist;
+		index index.html index.htm;
+
+		keepalive_timeout   70;
+		
+		gzip on;
+		gzip_min_length 200;
+		gzip_buffers 4 16k;
+		gzip_comp_level 6;
+		gzip_types text/plain application/javascript text/css application/xml text/javascript application/json;
+		gzip_vary on;
+		gzip_disable "MSIE [1-6]\.";
+		gzip_proxied any;
+		
+		# 配置django
+		location /backend/ {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_pass_request_headers      on;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+		# 默认配置vue
+		location / {
+            proxy_pass http://127.0.0.1:8080;
+            proxy_pass_request_headers      on;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+		# 配置django, 
+		#location /api_static/ {
+        #    proxy_pass http://127.0.0.1:8000;
+        #    proxy_pass_request_headers      on;
+        #    proxy_set_header Host $host;
+        #    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #}
+		
+		# 配置vue
+        #location /css/ {
+        #    alias C:/classes/test-dev3/test-dev3/vue_i_project/dist/css/;
+        #    expires 7d;
+        #}
+		#location /js/ {
+        #    alias C:/classes/test-dev3/test-dev3/vue_i_project/dist/js/;
+        #    expires 7d;
+        #}
+		#location /fonts/ {
+        #    alias C:/classes/test-dev3/test-dev3/vue_i_project/dist/fonts/;
+        #    expires 7d;
+        #}
+        #location @tech-support-index {
+        #    add_header Cache-Control no-cache;
+        #    expires 10;
+        #    root C:/classes/test-dev3/test-dev3/vue_i_project/dist/;
+        #    try_files /index.html =404;
+        #}
+        #location / {
+        #    root C:/classes/test-dev3/test-dev3/vue_i_project/dist/;
+        #    autoindex on;
+        #    try_files $uri @tech-support-index;
+        #}
+    }
+}
+
+前后端分离，跨域问题是没法避免的，所以nginx的代理就非常关键了
+产线部署的时候其实也是一样的，同样的部署方式
+
+
+登录模块：
+
+先定义返回格式
+
+# 这是一个通用的
+def common_response(success, data, error_code, error_message):
+    response = {
+        "data": data,
+        "success": success, #布尔型，成功或者是失败的标志
+        "error": {
+            "code": error_code,  # 错误码
+            "message": error_message
+        }
+    }
+    return JsonResponse(response, safe=False)
+
+
+# 这两个是快捷方式
+def response_success(data=None):
+    if data is None:
+        data = {}
+    return common_response(True, data, "", "")
+
+
+def response_failed(code=ErrorCode.common, message="参数错误", data=None):
+    if data is None:
+        data = {}
+    return common_response(False, data, code, message)
+
+
+参数校验： 依赖于一个第三方库
+https://blog.csdn.net/y472360651/article/details/81949653
+https://pypi.org/project/schema/
+
+
+pip install schema 安装起来
+
+
+from schema import Schema
+
+rule = Schema(int)
+result = rule.is_valid('1')
+
+print(result)
+
+Schema({"name": str, "psw": str}).validate({"name": "laozhang", "age": 18})
+
+is_valid 返回是一个布尔型，true false
+validate 如果不通过会抛出异常，如果通过了会返回格式化后的数据
+
+
+调用 is_valid   validate 都可以
+
+
+如果需要登录持久化，需要配置一下session
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 引擎（默认）
+SESSION_COOKIE_NAME = "sessionid"  # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
+SESSION_COOKIE_PATH = "/"  # Session的cookie保存的路径（默认）
+SESSION_COOKIE_DOMAIN = None  # Session的cookie保存的域名（默认）
+SESSION_COOKIE_SECURE = False  # 是否Https传输cookie（默认）
+SESSION_COOKIE_HTTPONLY = True  # 是否Session的cookie只支持http传输（默认）
+SESSION_COOKIE_AGE = 1209600  # Session的cookie失效日期（2周）（默认）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # 是否关闭浏览器使得Session过期（默认）
+SESSION_SAVE_EVERY_REQUEST = False  # 是否每次请求都保存Session，默认修改之后才保存（默认
+SESSION_COOKIE_SAMESITE=None
+
+还要配置一下app
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'interface_app.apps.InterfaceAppConfig',
+]
+
+
+登录接口：
+
+user_schema = Schema({"name": str, "psw": str})
+
+@require_http_methods(['POST'])
+def user_login(request, *args, **kwargs):
+    """
+    登录
+    :param request:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    body = request.body
+    data = json.loads(body, encoding='utf-8')
+
+    if not user_schema.is_valid(data):
+        return response_failed()
+
+    if User.objects.filter(username=data["name"]).exists():
+        user = authenticate(username=data["name"], password=data["psw"])
+    else:
+        user = User.objects.create_user(username=data["name"], password=data["psw"])
+    if not user:
+        return response_failed(code=ErrorCode.auth, message='登录失败')
+    else:
+        login(request, user)  # 登录持久化
+        return response_success()
