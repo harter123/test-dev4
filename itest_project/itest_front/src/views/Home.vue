@@ -1,42 +1,63 @@
 <template>
-  <div style="height: 100%">
-    <div :style="backgroundDiv" class="homeMain">
-      <div style="margin: 120px 0 0 50px">
-        <div style="
-        color: white;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.7;"
-        >JOIN THE CHANGE</div>
-        <div style="font-size: 3.5rem;font-weight: 400;
-    line-height: 1.2; color: white;">
-          <div>Space service</div>
-          <div>that moves</div>
-          <div>work forward</div>
+  <div style="height: 100%" class="home-main">
+    <div class="home-main-left">
+      <div>
+        <img :src="itestPng" class="home-main-left-image"/>
+      </div>
+      <div>
+        <div class="home-color home-main-left-menu-type">
+          测试接口
+        </div>
+        <div id="home-main-menu">
+          <el-menu
+              default-active="1"
+              background-color="#354052"
+              text-color="#fff"
+              class="el-menu-vertical-demo">
+            <el-menu-item index="1">
+              <i class="el-icon-menu"></i>
+              <span slot="title">模块管理</span>
+            </el-menu-item>
+            <el-menu-item index="2">
+              <i class="el-icon-document"></i>
+              <span slot="title">用例管理</span>
+            </el-menu-item>
+            <el-menu-item index="3">
+              <i class="el-icon-setting"></i>
+              <span slot="title">任务管理</span>
+            </el-menu-item>
+          </el-menu>
         </div>
       </div>
-      <div class="loginForm">
-        <h2>
-          itest platform
-        </h2>
-        <div>
-          <el-form :model="ruleForm" :rules="rules" ref="ruleFormRef" label-width="5px" class="demo-ruleForm">
-            <el-form-item label="" prop="name">
-              <el-input v-model="ruleForm.name" placeholder="Enter your username"></el-input>
-            </el-form-item>
-            <el-form-item label="" prop="psw">
-              <el-input show-password v-model="ruleForm.psw" placeholder="Enter your password"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="success" style="width: 100%" @click="submitForm">Get Started</el-button>
-            </el-form-item>
-          </el-form>
+
+      <div>
+        <div class="home-color home-main-left-menu-type">
+          测试工具
         </div>
       </div>
     </div>
-    <div class="homeFoot">
-      <div class="homeFootText">
-        All rights reserved. ©重定向科技. 2021 itest.info
+
+    <div class="home-main-right">
+      <div class="home-main-right-menu">
+        <div class="home-main-right-menu-title">
+          模块
+        </div>
+        <div class="home-main-right-menu-user">
+          <el-dropdown trigger="click">
+            <span class="el-dropdown-link" style="font-size: 18px">
+              {{ user.name }}<i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item icon="el-icon-user">Logout</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+      </div>
+      <div class="home-main-right-context">
+context
+      </div>
+      <div class="home-main-right-foot">
+        2021 © 重定向科技 - itest.info
       </div>
     </div>
   </div>
@@ -45,81 +66,106 @@
 
 <script>
 // @ is an alias to /src
+import {getLoginUserInfo} from "../request/user";
+import itest from "../assets/itest.png"
+
 export default {
   name: 'Home',
   data(){
     return {
-      classTest: 'test',
-      backgroundDiv: {
-        backgroundImage: 'url(' + require('../assets/img4.jpg') + ')',
-      },
-      ruleForm: {
-        name: '',
-        psw: '',
-      },
-      rules: {
-        name: [
-          { required: true, message: 'Enter your username', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
-        ],
-        psw: [
-          { required: true, message: 'Enter your password', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
-        ],
-      }
+      itestPng: itest,
+      user: {}
     }
   },
   components: {
   },
   methods:{
-    submitForm() {
-      this.$refs.ruleFormRef.validate((valid) => {
-        if (valid) {
-          alert('submit!');
-        } else {
-          console.log('error submit!!');
-          return false;
+    getUserInfo(){
+      getLoginUserInfo().then(rsp=>{
+        let success = rsp.data.success;
+        this.user = rsp.data.data;
+        if(false===success){
+          this.$router.push('/login');
         }
-      });
-    },
+      }).catch(()=>{
+        this.$router.push('/login');
+      })
+    }
+  },
+  created() {
+    this.getUserInfo()
   }
 }
 </script>
 
 <style>
-
-.homeMain {
-  width: 100%;
-  height: 85%;
-  background-size: 100% auto;
+.home-main{
   display: flex;
-  justify-content: space-between;
+  justify-content: normal;
 }
 
-.homeMain .el-input__inner{
+/*这里代表固定宽度260px,宽度不会自动延伸，但是高度自动延伸*/
+.home-main-left {
+  flex: 0 1 260px;
+  background: #354052
+}
+/*这里代表自动宽度，宽度自动延伸，高度自动延伸*/
+.home-main-right {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-main-left-image {
+  width: 85px;
+  margin: 20px auto;
+}
+
+.home-color {
+  color: #cedce4;
+}
+
+.home-main-left-menu-type {
+  font-size: 12px;
+  text-align: left;
+  margin-left: 30px;
+}
+
+#home-main-menu .el-menu-item {
+  text-align: left;
+}
+
+#home-main-menu i {
+  margin-left: 10px;
+}
+
+.home-main-right-menu {
+  display: flex;
   height: 50px;
-}
-.homeMain button{
-  padding: 15px 20px;
-}
-.homeFoot{
-  height: 15%;
-  background: #151b26;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
 }
 
-.homeFootText {
-  color: #8c98a4 !important;
+.home-main-right-menu-title {
+  flex: 1 1 auto;
+  text-align: left;
+}
+.home-main-right-menu-user {
+  flex: 0 1 100px;
+  padding: 10px 5px 5px 5px;
+  background-color: #fafbfd;
 }
 
-.loginForm {
-  width: 300px;
-  background: white;
-  border-radius: 5px;
-  height: 270px;
-  margin: 70px 60px 0 0;
-  padding: 20px 30px;
+.home-main-right-foot {
+  width: 100%;
+  height: 35px;
+  text-align: left;
+  padding-left: 40px;
+  color: #98a6ad;
+  padding-top: 15px;
+  border-top: 1px solid rgba(152,166,173,.2);
+}
+.home-main-right-context {
+  width: 100%;
+  flex: 1 1 auto;
 }
 </style>

@@ -1,0 +1,92 @@
+1. 做好登录模块的前后端交互
+2. 设计首页
+3. 开始设计project  service的后端结构
+
+访问首页逻辑：
+1. 首先访问主页，然后在主页面先检查之前是否已经登录了  #  查询用户信息这个接口backend/user/
+2. 如果登陆过了，则直接进入主页；
+3. 如果没有登录过，或者是登录失效了，则跳转到登录页面进行
+4. 登录成功后，重新跳转到主页
+
+涉及到两个页面，登录页面和主页
+
+如何调用js函数
+1. import进来
+
+import {getLoginUserInfo} from "../request/user";   #如果是js函数，需要加上大括号，如果是组件，则不需要
+
+import login from '../views/login.vue'  这是import 组件
+
+这个一定要注意一下
+
+2. 就可以直接使用了
+
+我用的axios这个库，axios是一个promise对象，这是一个promise的用法
+
+getLoginUserInfo().then(data=>{
+        成功的代码
+      }).catch(data=>{
+        失败的代码
+      })
+
+需要注意一下
+编写接口的时候，一定要把对象返回回来，下面这个例子
+export const getRequest = function (path, data={}) {
+    return axios.get(backendHost + path, {
+        params: data,
+    })
+};
+export const getLoginUserInfo = function () { //获取已经登录的用户信息
+    return getRequest('backend/user/')
+};
+
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+这里一定要return回来，才可以使用
+
+
+vue是如何进行页面跳转：
+this.$router.push('/login'); 这是最简单的方式，还有更加复杂的形式，我们就不讲了，有兴趣可以自行研究
+
+axios对象的data对象：
+config: {url: "http://localhost/backend/user/", method: "get", headers: {…}, params: {…}, transformRequest: Array(1), …}
+data: {data: {…}, success: false, error: {…}}
+headers: {connection: "keep-alive", content-length: "101", content-type: "application/json", date: "Sun, 28 Mar 2021 02:36:16 GMT", referrer-policy: "same-origin", …}
+request: XMLHttpRequest {readyState: 4, timeout: 0, withCredentials: true, upload: XMLHttpRequestUpload, onreadystatechange: ƒ, …}
+status: 200
+statusText: "OK"
+
+
+前后端分离的请求方式跟虫师以前的非前后端分离的请求方式是不一样的：
+1.虫师以前的那个方式，他是直接get 或者是post都是面向是一个后端的模型（template）页面
+应该说的包含页面的接口，这个接口同时接受参数，也要负责渲染页面
+
+2.我们前后端分离是不一样的，我们前端完完整是只是负责html页面，后端完完整只是负责json数据方面；
+具体的请求方式
+1.前端通过ajax的方式，向后端请求接口，获取到json数据
+2.然后前端根据这个数据更新前端的页面展示
+
+
+如果请求出现这个问题，是csrf的一个策略问题，配置一下后端就可以了
+Forbidden (403)
+CSRF verification failed. Request aborted.
+
+在setting文件里面把csrf的那个中间注释掉就可以啦
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ajax在我看来，就是一种可以在html的页面里面以后台的形式请求接口，并且能够部分的更新html页面，的一种技术
+
+
+
