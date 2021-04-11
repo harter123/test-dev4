@@ -17,9 +17,18 @@ from django.contrib import admin
 from django.urls import path
 
 import interface_app.user_views as user_views
+from interface_app.views.project_views import ProjectsView, ProjectView
+from interface_app.views.service_views import ServicesView, ServiceView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('backend/login/', user_views.user_login),
     path('backend/logout/', user_views.user_logout),
     path('backend/user/', user_views.get_user_info),
+
+    path('backend/projects/', ProjectsView.as_view()),
+    path('backend/project/<int:project_id>/', ProjectView.as_view()),
+
+    path('backend/services/', ServicesView.as_view()),
+    path('backend/service/<int:service_id>/', ServiceView.as_view()),
 ]

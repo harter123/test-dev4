@@ -1,0 +1,127 @@
+1.project 和 service的表结构
+2.restful风格接口设计
+3.定义project和service的接口
+
+
+
+面向对象的接口定义，定义接口是一个类
+
+老的定义接口方式就是一个函数
+
+
+我们对一个表的操作通常有哪几种： 增删改查
+1. 增加  2. 更新  3. 删除  4. 获取单个数据  5. 获取多个数据
+post        put      delete    get             get
+
+关于rest风格接口的说明：
+以前我们定义一个接口就是 一个url
+
+
+rest风格的接口是  一个Url + 请求方法 （url + 方法确定一个接口）
+
+举个例子：  有个/user 的url, 如果用传统的定义方式，这个url就只是一个接口
+但是如果rest的方格定义，那么这个url 至少有4个接口
+1.get     /user  
+2.post    /user
+3.delete  /user
+4.put     /user
+用户的增删改查
+
+如果用传统的方法，用户的增删改查需要定义四个url
+/user-get
+/user-create
+/user-delete
+/user-update
+
+
+可以这个理解restful风格，就是一个url代表一个资源文件或者是一个表
+不同的请求方式代表这个资源的增删改查（post，get， delete， put）
+
+
+以project为例子, 上面的增删改查可以两类
+1. 单个数据的操作  1. 更新  2. 删除  3. 获取单个数据   /project/<:project_id>/
+2. 列表的操作      1.获取多个数据  2.增加              /projects/
+
+所以就可以构造五个接口
+1. 更新：       put    /project/<:project_id>/  
+2. 删除:        delete /project/<:project_id>/  
+3. 查询单个数据 get    /project/<:project_id>/  
+4. 查询多个数据 get    /projects/
+5. 增加 :       post   /projects/
+//6  批量删除：   delete /projects/
+//7. 批量修改     put    /projects/
+
+django的实现：
+接口定义：
+
+from django.views.generic import View
+
+class ProjectView(View):
+    def get(self, request, project_id, *args, **kwargs):
+        """
+        请求是单个数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+    def put(self, request, project_id, *args, **kwargs):
+        """
+        这个是修改数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+    def delete(self, request, project_id, *args, **kwargs):
+        """
+        这个是删除数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+class ProjectsView(View):
+    def get(self, request, *args, **kwargs):
+        """
+        请求列表数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+    def post(self, request, *args, **kwargs):
+        """
+        创建数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+
+接口注册：
+    path('backend/projects/', ProjectsView.as_view()),
+    path('backend/project/<int:project_id>/', ProjectView.as_view()),
+
+
+Project.objects.filter(id=project_id).update(**data) 这种写法是什么意思
+假如data  = {"name":1, "des":2}
+这种写法最终的效果就是  Project.objects.filter(id=project_id).update(name=1,des=2)
+
+
+
