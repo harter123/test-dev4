@@ -1,0 +1,62 @@
+大纲：
+1.重新规划一下前端ui
+2.project前端增删改查做好了
+
+
+重新规划一下前端ui：
+把project的页面作为首页，点击projet，就进入以前的那个详情页面
+project ==》 详情
+
+created() {
+    this.getUserInfo()
+    this.getAllProjects()
+  }
+是不可以这么写的
+因为getUserInfo是用来校验用户是否登录过，而且是异步的
+因为一部上面这个代码，认证和获取项目列表是同时进行的，
+
+没有认证完，就调用这个接口是会有问题的，不安全的
+所以需要把这个调用project的函数放在认证完成后的回调里面去，就安全了
+
+getUserInfo(){
+      getLoginUserInfo().then(rsp=>{
+        let success = rsp.data.success;
+        this.user = rsp.data.data;
+        if(false===success){
+          this.$router.push('/login');
+        }
+        this.getAllProjects()
+      }).catch(()=>{
+        this.$router.push('/login');
+      })
+    },
+
+
+class Project(models.Model):
+    name = models.CharField(max_length=255, null=False)
+    description = models.TextField()
+    status = models.CharField(max_length=20, null=False, default='正常')
+    create_time = models.DateTimeField(auto_now_add=True)   # 这个代表在创建的时候自动设置当前时间
+
+
+projects = Project.objects.all()
+        ret = []
+        for item in projects:
+            ret.append(model_to_dict(item))
+            ret['create_time'] = datetime.datetime.strftime(item.create_time, '%Y-%m-%d %H:%M')
+        return response_success(data=ret)
+
+这个model_to_dict 没法把时间字段转换进去
+
+
+
+<el-table-column
+            prop="status"
+            min-width="20%"
+            label="状态">
+          <template slot-scope="scope">
+            <span v-if="1 == scope.row.status">正常</span>
+            <span v-else>已关闭</span>
+          </template>
+        </el-table-column>
+自定义的列表项    scope.row 这个获取当前行的数据，格式必须要按照例子这么写才行

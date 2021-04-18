@@ -18,7 +18,7 @@ from django.urls import path
 
 import interface_app.user_views as user_views
 from interface_app.views.project_views import ProjectsView, ProjectView
-from interface_app.views.service_views import ServicesView, ServiceView
+from interface_app.views.service_views import ServiceView, ServicesView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

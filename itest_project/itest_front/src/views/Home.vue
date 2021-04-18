@@ -156,7 +156,6 @@ export default {
 }
 
 .home-main-right-foot {
-  width: 100%;
   height: 35px;
   text-align: left;
   padding-left: 40px;

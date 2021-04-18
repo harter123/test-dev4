@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from django.forms import model_to_dict
 from django.views.generic import View
@@ -10,7 +11,8 @@ from interface_app.utils.response import response_success, response_failed, Erro
 
 class ProjectView(View):
     update_schema = Schema({Optional('name'): And(str, lambda s: 0 < len(s) < 256),
-                            Optional('description'): str})
+                            Optional('description'): str,
+                            Optional('status'): int})
 
     # Optional代表字段是可选   and代表需要满足所有条件
 
@@ -27,6 +29,7 @@ class ProjectView(View):
         if not project:
             return response_failed(code=ErrorCode.project, message='数据不存在')
         project_dict = model_to_dict(project)
+        project_dict['create_time'] = datetime.datetime.strftime(project.create_time, '%Y-%m-%d %H:%M')
         return response_success(data=project_dict)
 
     def put(self, request, project_id, *args, **kwargs):
@@ -91,7 +94,9 @@ class ProjectsView(View):
         projects = Project.objects.all()
         ret = []
         for item in projects:
-            ret.append(model_to_dict(item))
+            tmp = model_to_dict(item)
+            tmp['create_time'] = datetime.datetime.strftime(item.create_time, '%Y-%m-%d %H:%M')
+            ret.append(tmp)
         return response_success(data=ret)
 
     def post(self, request, *args, **kwargs):
