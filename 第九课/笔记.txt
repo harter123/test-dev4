@@ -1,0 +1,22 @@
+大纲：
+1.完成首页的整改
+2.完成service的增删改查
+
+
+ <a :href="'/main?projectId=' + scope.row.id" style="color: #409EFF; text-decoration: none">{{scope.row.name}}</a>
+
+href="url"  这里面的url实际上就是一个静态的字符串
+例如 href="/main"
+
+假如我们在前面添加一个：
+:href="url"  那么这个url就是一个动态vue的变量
+
+data 定义一个变量 mainPath = "/main?projectId="
+:href="mainPath + scope.row.id"
+
+
+对于各种标签的属性来说，之前在前面添加了:，那么后面的值必须要是变量，函数，或者表达式
+不加：就是一个纯粹的字符串
+
+
+this.$route.query.projectId  用这种方式，可以获取url里面的参数

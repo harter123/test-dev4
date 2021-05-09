@@ -10,19 +10,20 @@
         </div>
         <div id="home-main-menu">
           <el-menu
-              default-active="1"
+              @select="handleSelect"
+              :default-active="defaultActive"
               background-color="#354052"
               text-color="#fff"
               class="el-menu-vertical-demo">
-            <el-menu-item index="1">
+            <el-menu-item index="service">
               <i class="el-icon-menu"></i>
               <span slot="title">模块管理</span>
             </el-menu-item>
-            <el-menu-item index="2">
+            <el-menu-item index="interface">
               <i class="el-icon-document"></i>
               <span slot="title">用例管理</span>
             </el-menu-item>
-            <el-menu-item index="3">
+            <el-menu-item index="task">
               <i class="el-icon-setting"></i>
               <span slot="title">任务管理</span>
             </el-menu-item>
@@ -40,7 +41,7 @@
     <div class="home-main-right">
       <div class="home-main-right-menu">
         <div class="home-main-right-menu-title">
-          模块
+          {{activeName}}
         </div>
         <div class="home-main-right-menu-user">
           <el-dropdown trigger="click">
@@ -54,7 +55,7 @@
         </div>
       </div>
       <div class="home-main-right-context">
-context
+        <router-view :projectId="projectId"/>
       </div>
       <div class="home-main-right-foot">
         2021 © 重定向科技 - itest.info
@@ -74,7 +75,10 @@ export default {
   data(){
     return {
       itestPng: itest,
-      user: {}
+      user: {},
+      projectId: undefined,
+      defaultActive: "service",
+      activeName: "模块"
     }
   },
   components: {
@@ -90,10 +94,40 @@ export default {
       }).catch(()=>{
         this.$router.push('/login');
       })
+    },
+    handleSelect(key){
+      this.$router.push('/main/'+key + "/?projectId="+this.projectId);
+      switch (key){
+        case 'service':
+          this.activeName="模块";
+          break;
+        case 'interface':
+          this.activeName="接口";
+          break;
+        case 'task':
+          this.activeName="任务";
+          break;
+      }
     }
   },
   created() {
     this.getUserInfo()
+    this.projectId = this.$route.query.projectId
+    if(undefined==this.projectId || this.projectId==""){
+      this.$router.push('/');
+    }
+    if(-1 !== this.$route.path.indexOf("interface")){
+      this.activeName="接口";
+      this.defaultActive = "interface"
+    }
+    if(-1 !== this.$route.path.indexOf("task")){
+      this.activeName="任务";
+      this.defaultActive = "task"
+    }
+    if(-1 !== this.$route.path.indexOf("service")){
+      this.activeName="模块";
+      this.defaultActive = "service"
+    }
   }
 }
 </script>
@@ -166,5 +200,6 @@ export default {
 .home-main-right-context {
   width: 100%;
   flex: 1 1 auto;
+  box-sizing: border-box;
 }
 </style>

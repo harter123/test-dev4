@@ -1,113 +1,146 @@
 <template>
-  <div style="height: 100%" class="home-main home-main-right">
-    <div class="home-main-right-menu">
-      <div class="home-main-right-menu-title">
-
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item>Itest</el-breadcrumb-item>
-          <el-breadcrumb-item>项目</el-breadcrumb-item>
-        </el-breadcrumb>
+  <div style="height: 100%" class="home-main">
+    <div class="home-main-left">
+      <div>
+        <img :src="itestPng" class="home-main-left-image"/>
+      </div>
+      <div>
+        <div class="home-color home-main-left-menu-type">
+          测试平台
+        </div>
+        <div id="home-main-menu">
+          <el-menu
+              default-active="project"
+              background-color="#354052"
+              text-color="#fff"
+              class="el-menu-vertical-demo">
+            <el-menu-item index="project">
+              <i class="el-icon-menu"></i>
+              <span slot="title">自动化接口项目管理</span>
+            </el-menu-item>
+            <el-menu-item index="case">
+              <i class="el-icon-menu"></i>
+              <span slot="title">手动测试用例管理</span>
+            </el-menu-item>
+          </el-menu>
+        </div>
       </div>
 
-      <div class="home-main-right-menu-user">
-        <el-dropdown trigger="click">
+    </div>
+    <div class="home-main-right">
+      <div class="home-main-right-menu">
+        <div class="home-main-right-menu-title">
+
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item>Itest</el-breadcrumb-item>
+            <el-breadcrumb-item>项目</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+
+        <div class="home-main-right-menu-user">
+          <el-dropdown trigger="click">
             <span class="el-dropdown-link" style="font-size: 18px">
               {{ user.name }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item icon="el-icon-user">Logout</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item icon="el-icon-user">Logout</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </div>
-    </div>
-    <div class="home-main-right-context">
-      <el-button type="primary" plain @click="openAddProjectDialog">创建项目</el-button>
-      <el-table
-          :data="projectList"
-          :header-cell-style="{'color': '#555555'}"
-          stripe
-          style="width: 100%">
-        <el-table-column
-            prop="name"
-            label="名称"
-            min-width="20%">
-        </el-table-column>
-        <el-table-column
-            prop="description"
-            label="描述"
-            min-width="30%">
-        </el-table-column>
-        <el-table-column
-            prop="status"
-            min-width="20%"
-            label="状态">
-          <template slot-scope="scope">
-            <span v-if="1 == scope.row.status"><el-tag>正常</el-tag></span>
-            <span v-else><el-tag type="info">已关闭</el-tag></span>
-          </template>
-        </el-table-column>
-        <el-table-column
-            prop="create_time"
-            min-width="20%"
-            label="创建时间">
-        </el-table-column>
-        <el-table-column
-            prop="ops"
-            min-width="10%"
-            label="操作">
-          <template slot-scope="scope">
-            <el-button @click="deleteProject(scope.row)" type="text" size="small">删除</el-button>
-            <el-button @click="openEditProjectDialog(scope.row)" type="text" size="small">编辑</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
-    <div class="home-main-right-foot">
-      2021 © 重定向科技 - itest.info
-    </div>
-
-    <el-dialog title="创建项目" :visible.sync="addProjectDialogVisible">
-      <el-form :model="addProjectForm" :rules="addProjectRule" ref="addProjectForm">
-        <el-form-item label="名称" label-width="50px"  prop="name">
-          <el-input v-model="addProjectForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" label-width="50px" prop="description">
-          <el-input type="textarea"
-                    :rows="2"
-                    v-model="addProjectForm.description" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="addProjectDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addProjectConfirm">确 定</el-button>
+      <div class="home-main-right-context">
+        <el-button type="primary" plain @click="openAddProjectDialog">创建项目</el-button>
+        <el-table
+            :data="projectList"
+            :header-cell-style="{'color': '#555555'}"
+            stripe
+            style="width: 100%">
+          <el-table-column
+              prop="name"
+              label="名称"
+              min-width="20%">
+            <template slot-scope="scope">
+              <a :href="mainPath + scope.row.id" style="color: #409EFF; text-decoration: none">{{scope.row.name}}</a>
+            </template>
+          </el-table-column>
+          <el-table-column
+              prop="description"
+              label="描述"
+              min-width="30%">
+          </el-table-column>
+          <el-table-column
+              prop="status"
+              min-width="20%"
+              label="状态">
+            <template slot-scope="scope">
+              <span v-if="1 == scope.row.status"><el-tag>正常</el-tag></span>
+              <span v-else><el-tag type="info">已关闭</el-tag></span>
+            </template>
+          </el-table-column>
+          <el-table-column
+              prop="create_time"
+              min-width="20%"
+              label="创建时间">
+          </el-table-column>
+          <el-table-column
+              prop="ops"
+              min-width="10%"
+              label="操作">
+            <template slot-scope="scope">
+              <el-button @click="deleteProject(scope.row)" type="text" size="small">删除</el-button>
+              <el-button @click="openEditProjectDialog(scope.row)" type="text" size="small">编辑</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
-    </el-dialog>
-
-    <el-dialog title="编辑项目" :visible.sync="editProjectDialogVisible">
-      <el-form :model="editProjectForm" :rules="editProjectRule" ref="editProjectForm">
-        <el-form-item label="名称" label-width="50px"  prop="name">
-          <el-input v-model="editProjectForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" label-width="50px" prop="description">
-          <el-input type="textarea"
-                    :rows="2"
-                    v-model="editProjectForm.description" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="状态" label-width="50px" prop="status">
-          <div style="text-align: left;">
-            <el-radio v-model="editProjectForm.status" :label="1">正常</el-radio>
-            <el-radio v-model="editProjectForm.status" :label="2">已关闭</el-radio>
-          </div>
-
-        </el-form-item>
-
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="editProjectDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editProjectConfirm">确 定</el-button>
+      <div class="home-main-right-foot">
+        2021 © 重定向科技 - itest.info
       </div>
-    </el-dialog>
+
+      <el-dialog title="创建项目" :visible.sync="addProjectDialogVisible">
+        <el-form :model="addProjectForm" :rules="addProjectRule" ref="addProjectForm">
+          <el-form-item label="名称" label-width="50px"  prop="name">
+            <el-input v-model="addProjectForm.name" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="描述" label-width="50px" prop="description">
+            <el-input type="textarea"
+                      :rows="2"
+                      v-model="addProjectForm.description" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="addProjectDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="addProjectConfirm">确 定</el-button>
+        </div>
+      </el-dialog>
+
+      <el-dialog title="编辑项目" :visible.sync="editProjectDialogVisible">
+        <el-form :model="editProjectForm" :rules="editProjectRule" ref="editProjectForm">
+          <el-form-item label="名称" label-width="50px"  prop="name">
+            <el-input v-model="editProjectForm.name" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="描述" label-width="50px" prop="description">
+            <el-input type="textarea"
+                      :rows="2"
+                      v-model="editProjectForm.description" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="状态" label-width="50px" prop="status">
+            <div style="text-align: left;">
+              <el-radio v-model="editProjectForm.status" :label="1">正常</el-radio>
+              <el-radio v-model="editProjectForm.status" :label="2">已关闭</el-radio>
+            </div>
+
+          </el-form-item>
+
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="editProjectDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="editProjectConfirm">确 定</el-button>
+        </div>
+      </el-dialog>
+    </div>
   </div>
+
 
 </template>
 
@@ -121,6 +154,7 @@ export default {
   name: 'Home',
   data(){
     return {
+      mainPath: "/main/service/?projectId=",
       itestPng: itest,
       user: {},
       projectList: [],
@@ -313,5 +347,6 @@ export default {
   flex: 1 1 auto;
   text-align: left;
   padding: 0 10px;
+  box-sizing: border-box;
 }
 </style>
