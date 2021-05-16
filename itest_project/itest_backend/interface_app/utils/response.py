@@ -6,6 +6,7 @@ class ErrorCode:
     auth = 10001
     project = 10002
     service = 10003
+    test_case = 10004
 
 
 # 这是一个通用的
