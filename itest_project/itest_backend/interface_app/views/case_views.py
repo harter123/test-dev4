@@ -172,5 +172,6 @@ class TestCasesView(View):
             data['response_assert'] = json.dumps(data['response_assert'], encoding="utf-8")
 
         case = TestCase.objects.create(**data)
+        case = TestCase.objects.get(id=case.id)
         case_dict = test_case_model_to_dict(case)
         return response_success(data=case_dict)

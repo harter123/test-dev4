@@ -1,0 +1,32 @@
+大纲：
+1.案例模块的前端的增删改查
+
+
+ace 编辑器： 不仅仅能够支持json，其他各种格式语言都可以支持
+
+https://blog.csdn.net/weixin_44634366/article/details/105688344
+ https://www.cnblogs.com/emilyzz/p/14184695.html
+
+1.安装： npm install --save-dev vue2-ace-editor
+2. 引入：import Editor from 'vue2-ace-editor'
+3. 注册：
+components: {
+    Editor
+  }, 
+
+4. 使用：
+<Editor v-model="testCase.request_body" @init="editorInit" lang="json" theme="chrome" width="450"
+              height="200"></Editor>
+
+初始化函数：
+editorInit: function () {
+                require('brace/ext/language_tools') //language extension prerequsite...
+                require('brace/mode/json')
+                require('brace/mode/javascript')    //language  这里改为sjon
+                require('brace/mode/less')
+                require('brace/theme/chrome')
+                require('brace/snippets/javascript') //snippet
+            },
+
+
+this.$emit("addInterfaceSuccess")  这个代表抛出一个事件给父组件，事件名称是addInterfaceSuccess

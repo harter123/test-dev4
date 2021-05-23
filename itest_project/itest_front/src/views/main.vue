@@ -2,7 +2,7 @@
   <div style="height: 100%" class="home-main">
     <div class="home-main-left">
       <div>
-        <img :src="itestPng" class="home-main-left-image"/>
+        <img @click="goToMain" :src="itestPng" class="home-main-left-image"/>
       </div>
       <div>
         <div class="home-color home-main-left-menu-type">
@@ -84,6 +84,9 @@ export default {
   components: {
   },
   methods:{
+    goToMain(){
+      this.$router.push('/');
+    },
     getUserInfo(){
       getLoginUserInfo().then(rsp=>{
         let success = rsp.data.success;
@@ -153,6 +156,7 @@ export default {
 .home-main-left-image {
   width: 85px;
   margin: 20px auto;
+  cursor: pointer;
 }
 
 .home-color {
@@ -182,6 +186,7 @@ export default {
 .home-main-right-menu-title {
   flex: 1 1 auto;
   text-align: left;
+  font-weight: bolder;
 }
 .home-main-right-menu-user {
   flex: 0 1 100px;
@@ -201,5 +206,6 @@ export default {
   width: 100%;
   flex: 1 1 auto;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 </style>

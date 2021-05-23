@@ -2,7 +2,7 @@
   <div style="height: 100%" class="home-main">
     <div class="home-main-left">
       <div>
-        <img :src="itestPng" class="home-main-left-image"/>
+        <img @click="goToMain" :src="itestPng" class="home-main-left-image"/>
       </div>
       <div>
         <div class="home-color home-main-left-menu-type">
@@ -198,6 +198,9 @@ export default {
   components: {
   },
   methods:{
+    goToMain(){
+      this.$router.push('/');
+    },
     getUserInfo(){
       getLoginUserInfo().then(rsp=>{
         let success = rsp.data.success;
@@ -328,6 +331,7 @@ export default {
   text-align: left;
   padding-top: 10px;
   padding-left: 10px;
+  font-weight: bolder;
 }
 .home-main-right-menu-user {
   flex: 0 1 100px;
