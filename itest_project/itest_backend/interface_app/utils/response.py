@@ -7,6 +7,7 @@ class ErrorCode:
     project = 10002
     service = 10003
     test_case = 10004
+    task = 10005
 
 
 # 这是一个通用的

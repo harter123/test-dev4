@@ -1,0 +1,24 @@
+大纲：
+1. 任务模块的后端表设计和接口
+2. 任务模块的增删改查
+
+
+用例和任务的相关接口：
+1. 获取某个任务的所有用例  get
+2. 某个任务的用例的添加    post
+2. 某个任务的用例的删除    delete
+
+
+task_case_ids = TaskTestCase.objects.filter(task_id=task_id).values_list("test_case_id", flat=True)
+查询某个task_id所有的关联数据，并且只需要取test_case_id这个字段
+select  
+
+test_case_id
+
+from task_test_case
+
+where task_id = xxxx
+
+这个flat=true是什么意思呢
+如果flat=true，则结果返回是一个数组["1", "2", "3"]
+如果flat=false,则返回是是一个字典数组[{"test_case_id": 1},{"test_case_id": 2},{"test_case_id": 3}]

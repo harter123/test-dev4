@@ -20,6 +20,7 @@ from django.urls import path
 import interface_app.user_views as user_views
 from interface_app.views.project_views import ProjectsView, ProjectView
 from interface_app.views.service_views import ServiceView, ServicesView
+from interface_app.views.task_views import TasksView, TaskView, TaskTestCasesView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,4 +36,8 @@ urlpatterns = [
 
     path('backend/testCases/', TestCasesView.as_view()),
     path('backend/testCase/<int:case_id>/', TestCaseView.as_view()),
+
+    path('backend/tasks/', TasksView.as_view()),
+    path('backend/task/<int:task_id>/', TaskView.as_view()),
+    path('backend/task/<int:task_id>/testCases/', TaskTestCasesView.as_view()),
 ]
