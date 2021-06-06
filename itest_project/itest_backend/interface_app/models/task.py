@@ -12,3 +12,7 @@ class TaskTestCase(models.Model):
     # 任务和案例的关联表
     task_id = models.IntegerField('task id', db_index=True)
     test_case_id = models.IntegerField('case id', db_index=True)
+
+
+class RunTask(models.Model):
+    task_id = models.IntegerField('任务id', default=0)

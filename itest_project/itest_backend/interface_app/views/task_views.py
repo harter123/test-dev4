@@ -1,11 +1,16 @@
+import datetime
 import json
+import os
 
+from django.conf import settings
 from django.forms import model_to_dict
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic import View
 from schema import Schema, And, Optional
 
 from interface_app.models.case import TestCase
-from interface_app.models.task import Task, TaskTestCase
+from interface_app.models.task import Task, TaskTestCase, RunTask
 from interface_app.utils.response import response_success, response_failed, ErrorCode
 from interface_app.views.case_views import test_case_model_to_dict
 
@@ -172,3 +177,78 @@ class TaskTestCasesView(View):
 
         TaskTestCase.objects.filter(id=task_test_case_id).delete()
         return response_success()
+
+
+class TaskRunTestCasesView(View):
+    def post(self, request, task_id, *args, **kwargs):
+        """
+        任务执行
+        :param request:
+        :param task_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        task_reports_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id))
+        if not os.path.exists(task_reports_path):
+            os.makedirs(task_reports_path)
+
+        RunTask.objects.create(task_id=task_id)
+
+        # 组装命令 pytest  run_task.py --html=xxx.html
+        now = datetime.datetime.now()
+        report_name = now.strftime("%Y-%m-%d-%H-%M-%S") + ".html"
+
+        run_task_path = os.path.join(settings.BASE_DIR, "task_test", "run_task.py")
+        report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
+        command = "pytest " + run_task_path + " --html=" + report_path
+        os.system(command)
+
+        return response_success()
+
+
+class TaskReportListView(View):
+    def get(self, request, task_id, *args, **kwargs):
+        """
+        获取report列表
+        :param request:
+        :param task_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        task_reports_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id))
+        list_name = []
+        for file in os.listdir(task_reports_path):
+            if os.path.splitext(file)[1] == '.html':
+                list_name.append(file)
+        return response_success(list_name)
+
+
+class TaskReportDetailView(View):
+    def get(self, request, task_id, *args, **kwargs):
+        """
+        获取report列表
+        :param request:
+        :param task_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        report_name = request.GET.get('report_name')
+        task_report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
+
+        if not os.path.exists(task_report_path):
+            return HttpResponse()
+        else:
+            # 把 assets/style.css 替换为 /static/assets/style.css
+            # file = open(task_report_path, "rt", encoding='utf-8')
+            # html_context = file.read()
+            # html_context = str(html_context)
+            # html_context = html_context.replace('href="assets/style.css"', 'href="/api_static/assets/style.css"')
+            #
+            # new_file = open(task_report_path, "w", encoding='utf-8')
+            # new_file.write(html_context)
+
+
+            return render(request, str(task_id) + "/" + report_name)
