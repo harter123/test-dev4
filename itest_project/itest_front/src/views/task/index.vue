@@ -24,7 +24,7 @@
           <el-button @click="deleteTask(scope.row)" type="text" size="small">删除</el-button>
           <el-button @click="openEditTaskDialog(scope.row)" type="text" size="small">编辑</el-button>
           <el-button @click="openTaskTestCaseDialog(scope.row)" type="text" size="small">用例管理</el-button>
-          <el-button @click="deleteTask(scope.row)" type="text" size="small">执行和结果</el-button>
+          <el-button @click="openTaskTestRunDialog(scope.row)" type="text" size="small">执行管理</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -110,17 +110,38 @@
        <selectTestCase :project-id="projectId" @success="addTaskTestCaseFun" @cancel="selectTaskTestCaseDialogVisible=false"></selectTestCase>
      </div>
     </el-dialog>
+
+    <el-dialog title="执行管理" :visible.sync="taskRunDialogVisible" width="50%" style="margin-top: -50px">
+      <div style="height: 500px;overflow-y: auto">
+        <el-button type="primary" plain @click="runTaskFun">执行</el-button>
+        <el-table
+            :data="taskReportList"
+            :header-cell-style="{'color': '#555555'}"
+            stripe
+            style="width: 100%">
+          <el-table-column
+              prop="name"
+              label="名称"
+              min-width="100%">
+            <template slot-scope="scope">
+              <a href="javascript:void()" @click="openReportDetail(scope.row)">{{scope.row.name}}</a>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Loading } from 'element-ui';
 import {
   addTaskTestCase,
   createTask,
   deleteTask,
   deleteTaskTestCase,
-  getTaskList,
-  getTaskTestCaseList,
+  getTaskList, getTaskReports,
+  getTaskTestCaseList, runTask,
   updateTask
 } from "@/request/task";
 import selectTestCase from "@/views/task/selectTestCase";
@@ -167,6 +188,8 @@ export default {
       testCaseList:[],
       currentTask: undefined,
       selectTaskTestCaseDialogVisible: false,
+      taskRunDialogVisible: false,
+      taskReportList: []
     }
   },
   components: {
@@ -258,6 +281,11 @@ export default {
       this.taskTestCaseDialogVisible = true;
       this.getTaskTestCaseListFun(task.id)
     },
+    openTaskTestRunDialog(task){
+      this.currentTask = task;
+      this.taskRunDialogVisible = true;
+      this.getTaskReportList(task.id)
+    },
     getTaskTestCaseListFun(taskId){
       getTaskTestCaseList(taskId).then(rsp=>{
         let success = rsp.data.success;
@@ -295,6 +323,29 @@ export default {
       }).catch(()=>{
       })
     },
+    runTaskFun(){
+      let loadingInstance1 = Loading.service({ fullscreen: true });
+      runTask(this.currentTask.id,).then(rsp=>{
+        let success = rsp.data.success;
+        if(true===success){
+          this.getTaskReportList(this.currentTask.id)
+        }
+        loadingInstance1.close()
+      }).catch(()=>{
+      })
+    },
+    getTaskReportList(taskId){
+      getTaskReports(taskId).then(rsp=>{
+        let success = rsp.data.success;
+        if(true===success){
+          this.taskReportList = rsp.data.data
+        }
+      }).catch(()=>{
+      })
+    },
+    openReportDetail(report){
+      window.open(`http://localhost/backend/task/${this.currentTask.id}/report/${report.name}/`)
+    }
   },
   created() {
     this.getAllTasks()

@@ -4,7 +4,7 @@
       <div class="interface-params-dec">
         名称
       </div>
-      <el-input v-model="testCase.name" placeholder="http://xxx.com"></el-input>
+      <el-input v-model="testCase.name" placeholder="name"></el-input>
     </div>
     <div class="interface-params-in-line">
       <el-select v-model="testCase.method" placeholder="请选择">
@@ -19,7 +19,7 @@
       </el-select>
 
       <el-input v-model="testCase.url" placeholder="http://xxx.com"></el-input>
-      <el-button type="primary" plain>发送</el-button>
+      <el-button type="primary" plain @click="debug">发送</el-button>
     </div>
     <div class="interface-params-in-line">
       <el-radio v-model="testCase.request_type" :label="formType">form-data</el-radio>
@@ -56,7 +56,7 @@
 
 <script>
 import Editor from 'vue2-ace-editor'
-import {updateTestCase} from "@/request/testCase";
+import {debugTestCase, updateTestCase} from "@/request/testCase";
 
 export default {
   props: {
@@ -126,6 +126,27 @@ export default {
         let success = rsp.data.success;
         if (true === success) {
           this.$emit("editInterfaceSuccess")
+        }
+      }).catch(() => {
+      })
+    },
+    debug(){
+      if ("" === this.testCase.url) {
+        this.$message.error('请输入URL');
+        return
+      }
+
+      let newCase = JSON.parse(JSON.stringify(this.testCase)) //复制一个新对象
+      let req = {}
+      req.request_body = JSON.parse(newCase.request_body)
+      req.method = newCase.method
+      req.url = newCase.url
+      req.request_type = newCase.request_type
+
+      debugTestCase(req).then(rsp => {
+        let success = rsp.data.success;
+        if (true === success) {
+          this.testCase.response = rsp.data.data
         }
       }).catch(() => {
       })

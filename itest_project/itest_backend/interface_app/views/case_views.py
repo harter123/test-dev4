@@ -10,6 +10,7 @@ from django.views.generic import View
 from schema import Schema, And, Optional
 
 from interface_app.utils.response import response_success, response_failed, ErrorCode
+from task_test.http_request import HttpRequest
 
 
 def test_case_model_to_dict(case: TestCase):
@@ -80,9 +81,9 @@ class TestCaseView(View):
             pass
         else:
             if data.get('request_body'):
-                data['request_body'] = json.dumps(data['request_body'], encoding="utf-8")
+                data['request_body'] = json.dumps(data['request_body'])
             if data.get('response_assert'):
-                data['response_assert'] = json.dumps(data['response_assert'], encoding="utf-8")
+                data['response_assert'] = json.dumps(data['response_assert'])
             TestCase.objects.filter(id=case_id).update(**data)
             case = TestCase.objects.filter(id=case_id).first()
 
@@ -167,11 +168,41 @@ class TestCasesView(View):
 
         data = self.create_schema.validate(data)
         if data.get('request_body'):
-            data['request_body'] = json.dumps(data['request_body'], encoding="utf-8")
+            data['request_body'] = json.dumps(data['request_body'])
         if data.get('response_assert'):
-            data['response_assert'] = json.dumps(data['response_assert'], encoding="utf-8")
+            data['response_assert'] = json.dumps(data['response_assert'])
 
         case = TestCase.objects.create(**data)
         case = TestCase.objects.get(id=case.id)
         case_dict = test_case_model_to_dict(case)
         return response_success(data=case_dict)
+
+
+class TestCaseDebugView(View):
+    debug_schema = Schema({
+        'url': str,
+        'method': int,
+        "request_type": int,
+        Optional("request_body"): dict,
+    })
+
+    def post(self, request, *args, **kwargs):
+        """
+        创建数据
+        :param request:
+        :param project_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        body = request.body
+        data = json.loads(body, encoding='utf-8')
+        if not self.debug_schema.is_valid(data):
+            return response_failed()
+
+        data = self.debug_schema.validate(data)
+        if data.get('request_body'):
+            data['request_body'] = json.dumps(data['request_body'])
+
+        response = HttpRequest.send_request(data['url'], data['method'], data.get('request_body', {}), data['request_type'])  # 4. 进行http请求，获取响应
+        return response_success(data=response)

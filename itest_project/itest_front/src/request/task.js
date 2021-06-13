@@ -28,3 +28,11 @@ export const deleteTaskTestCase = function (taskId, taskTestCaseId) {//任务删
 export const getTaskTestCaseList = function (taskId) { //获取任务的所有用例
     return getRequest(`/backend/task/${taskId}/testCases/`)
 };
+
+export const runTask = function (taskId) { //执行任务
+    return postRequest(`/backend/task/${taskId}/run/`)
+};
+
+export const getTaskReports = function (taskId) { //执行任务
+    return getRequest(`/backend/task/${taskId}/reports/`)
+};

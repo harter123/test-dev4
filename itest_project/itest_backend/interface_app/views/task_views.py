@@ -202,6 +202,7 @@ class TaskRunTestCasesView(View):
         run_task_path = os.path.join(settings.BASE_DIR, "task_test", "run_task.py")
         report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
         command = "pytest " + run_task_path + " --html=" + report_path
+        print(command)
         os.system(command)
 
         return response_success()
@@ -219,14 +220,17 @@ class TaskReportListView(View):
         """
         task_reports_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id))
         list_name = []
+        if not os.path.exists(task_reports_path):
+            return response_success(list_name)
+
         for file in os.listdir(task_reports_path):
             if os.path.splitext(file)[1] == '.html':
-                list_name.append(file)
+                list_name.append({"name": file})
         return response_success(list_name)
 
 
 class TaskReportDetailView(View):
-    def get(self, request, task_id, *args, **kwargs):
+    def get(self, request, task_id, report_name, *args, **kwargs):
         """
         获取report列表
         :param request:
@@ -235,20 +239,202 @@ class TaskReportDetailView(View):
         :param kwargs:
         :return:
         """
-        report_name = request.GET.get('report_name')
         task_report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
 
         if not os.path.exists(task_report_path):
             return HttpResponse()
         else:
-            # 把 assets/style.css 替换为 /static/assets/style.css
-            # file = open(task_report_path, "rt", encoding='utf-8')
-            # html_context = file.read()
-            # html_context = str(html_context)
-            # html_context = html_context.replace('href="assets/style.css"', 'href="/api_static/assets/style.css"')
-            #
-            # new_file = open(task_report_path, "w", encoding='utf-8')
-            # new_file.write(html_context)
+            # 把 assets/style.css 替换为 为style,不替代会有样式问题
+            file = open(task_report_path, "rt", encoding='utf-8')
+            html_context = file.read()
+            html_context = str(html_context)
 
+            style = """
+            <style>
+      body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	/* do not increase min-width as some may use split screens */
+	min-width: 800px;
+	color: #999;
+}
+
+h1 {
+	font-size: 24px;
+	color: black;
+}
+
+h2 {
+	font-size: 16px;
+	color: black;
+}
+
+p {
+    color: black;
+}
+
+a {
+	color: #999;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+
+#environment td {
+	padding: 5px;
+	border: 1px solid #E6E6E6;
+}
+
+#environment tr:nth-child(odd) {
+	background-color: #f6f6f6;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed, .passed .col-result {
+	color: green;
+}
+span.skipped, span.xfailed, span.rerun, .skipped .col-result, .xfailed .col-result, .rerun .col-result {
+	color: orange;
+}
+span.error, span.failed, span.xpassed, .error .col-result, .failed .col-result, .xpassed .col-result  {
+	color: red;
+}
+
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+
+#results-table {
+	border: 1px solid #e6e6e6;
+	color: #999;
+	font-size: 12px;
+	width: 100%
+}
+
+#results-table th, #results-table td {
+	padding: 5px;
+	border: 1px solid #E6E6E6;
+	text-align: left
+}
+#results-table th {
+	font-weight: bold
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+
+.log:only-child {
+	height: inherit
+}
+.log {
+	background-color: #e6e6e6;
+	border: 1px solid #e6e6e6;
+	color: black;
+	display: block;
+	font-family: "Courier New", Courier, monospace;
+	height: 230px;
+	overflow-y: scroll;
+	padding: 5px;
+	white-space: pre-wrap
+}
+div.image {
+	border: 1px solid #e6e6e6;
+	float: right;
+	height: 240px;
+	margin-left: 5px;
+	overflow: hidden;
+	width: 320px
+}
+div.image img {
+	width: 320px
+}
+div.video {
+	border: 1px solid #e6e6e6;
+	float: right;
+	height: 240px;
+	margin-left: 5px;
+	overflow: hidden;
+	width: 320px
+}
+div.video video {
+	overflow: hidden;
+	width: 320px;
+    height: 240px;
+}
+.collapsed {
+	display: none;
+}
+.expander::after {
+	content: " (show details)";
+	color: #BBB;
+	font-style: italic;
+	cursor: pointer;
+}
+.collapser::after {
+	content: " (hide details)";
+	color: #BBB;
+	font-style: italic;
+	cursor: pointer;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+	cursor: pointer;
+}
+
+.sort-icon {
+	font-size: 0px;
+	float: left;
+	margin-right: 5px;
+	margin-top: 5px;
+	/*triangle*/
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+}
+
+.inactive .sort-icon {
+	/*finish triangle*/
+	border-top: 8px solid #E6E6E6;
+}
+
+.asc.active .sort-icon {
+	/*finish triangle*/
+	border-bottom: 8px solid #999;
+}
+
+.desc.active .sort-icon {
+	/*finish triangle*/
+	border-top: 8px solid #999;
+}
+
+  </style>
+            """
+
+            html_context = html_context.replace('<link href="assets/style.css" rel="stylesheet" type="text/css"/></head>', style)
+
+            new_file = open(task_report_path, "w", encoding='utf-8')
+            new_file.write(html_context)
 
             return render(request, str(task_id) + "/" + report_name)

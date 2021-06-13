@@ -19,3 +19,7 @@ export const getTestCase = function (testCaseId) {//删除项目
 export const getTestCaseList = function (serviceId, size, page) { //获取项目
     return getRequest(`/backend/testCases/?service_id=${serviceId}&page=${page}&size=${size}`)
 };
+
+export const debugTestCase = function (data) { //创建项目
+    return postRequest('/backend/testCase/debug/', data)
+};
