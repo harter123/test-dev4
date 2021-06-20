@@ -21,7 +21,7 @@ import interface_app.user_views as user_views
 from interface_app.views.project_views import ProjectsView, ProjectView
 from interface_app.views.service_views import ServiceView, ServicesView
 from interface_app.views.task_views import TasksView, TaskView, TaskTestCasesView, TaskRunTestCasesView, \
-    TaskReportListView, TaskReportDetailView
+    TaskReportListView, TaskReportDetailView, TaskIntervalRunTestCasesView
 
 
 def test1(request):
@@ -53,6 +53,8 @@ urlpatterns = [
     path('backend/task/<int:task_id>/testCases/', TaskTestCasesView.as_view()),
 
     path('backend/task/<int:task_id>/run/', TaskRunTestCasesView.as_view()),
+    path('backend/task/<int:task_id>/interval_run/', TaskIntervalRunTestCasesView.as_view()),
+
     path('backend/task/<int:task_id>/reports/', TaskReportListView.as_view()),
     path('backend/task/<int:task_id>/report/<str:report_name>/', TaskReportDetailView.as_view()),
 

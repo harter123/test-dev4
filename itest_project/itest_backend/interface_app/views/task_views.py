@@ -2,6 +2,9 @@ import datetime
 import json
 import os
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_job, register_events
+
 from django.conf import settings
 from django.forms import model_to_dict
 from django.http import HttpResponse
@@ -14,6 +17,46 @@ from interface_app.models.task import Task, TaskTestCase, RunTask
 from interface_app.utils.response import response_success, response_failed, ErrorCode
 from interface_app.views.case_views import test_case_model_to_dict
 
+
+try:
+    # 实例化调度器
+    scheduler = BackgroundScheduler()
+    # 调度器使用DjangoJobStore()
+    scheduler.add_jobstore(DjangoJobStore(), "default")
+    # 设置定时任务，选择方式为interval，时间间隔为10s
+    # 另一种方式为每天固定时间执行任务，对应代码为：
+
+    # def my_job():
+    #     # 这里写你要执行的任务
+    #     print("myjob")
+    register_events(scheduler)
+    scheduler.start()
+
+    # scheduler.add_job(my_job, 'interval', seconds=10, id="test")
+    # scheduler.remove_job("test")
+
+except Exception as e:
+    print(e)
+    # 有错误就停止定时器
+    scheduler.shutdown()
+
+
+def run_task_common(task_id):
+    task_reports_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id))
+    if not os.path.exists(task_reports_path):
+        os.makedirs(task_reports_path)
+
+    RunTask.objects.create(task_id=task_id)
+
+    # 组装命令 pytest  run_task.py --html=xxx.html
+    now = datetime.datetime.now()
+    report_name = now.strftime("%Y-%m-%d-%H-%M-%S") + ".html"
+
+    run_task_path = os.path.join(settings.BASE_DIR, "task_test", "run_task.py")
+    report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
+    command = "pytest " + run_task_path + " --html=" + report_path
+    print(command)
+    os.system(command)
 
 class TaskView(View):
     update_schema = Schema({Optional('name'): And(str, lambda s: 0 < len(s) < 256),
@@ -189,22 +232,71 @@ class TaskRunTestCasesView(View):
         :param kwargs:
         :return:
         """
-        task_reports_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id))
-        if not os.path.exists(task_reports_path):
-            os.makedirs(task_reports_path)
+        run_task_common(task_id)
+        return response_success()
 
-        RunTask.objects.create(task_id=task_id)
 
-        # 组装命令 pytest  run_task.py --html=xxx.html
-        now = datetime.datetime.now()
-        report_name = now.strftime("%Y-%m-%d-%H-%M-%S") + ".html"
+class TaskIntervalRunTestCasesView(View):
+    update_schema = Schema({'days': And(int, lambda s: 0 <= s ),
+                            'hours': And(int, lambda s: 0 <= s ),
+                            'minutes': And(int, lambda s: 0 <= s ),
+                            'start_time': str})
+    def post(self, request, task_id, *args, **kwargs):
+        """
+        任务循环执行
+        :param request:
+        :param task_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        task = Task.objects.filter(id=task_id).first()
+        if not task:
+            return response_failed(code=ErrorCode.task, message='数据不存在')
 
-        run_task_path = os.path.join(settings.BASE_DIR, "task_test", "run_task.py")
-        report_path = os.path.join(settings.BASE_DIR, "task_test", "reports", str(task_id), report_name)
-        command = "pytest " + run_task_path + " --html=" + report_path
-        print(command)
-        os.system(command)
+        body = request.body
+        data = json.loads(body, encoding='utf-8')
+        if not self.update_schema.is_valid(data):
+            return response_failed()
 
+        data = self.update_schema.validate(data)
+        if not data:  # 如果没有传数据，就不需要处理
+            pass
+        else:
+            data['interval_switch'] = True
+            Task.objects.filter(id=task_id).update(**data)
+
+        job = scheduler.get_job("task"+task_id)
+        if not job:
+            scheduler.remove_job("task" + task_id)
+
+        scheduler.add_job(run_task_common, 'interval', args=[task_id], days=data["days"], hours=data["hours"], minutes=data["minutes"], start_date=data["start_time"], id="task"+task_id)
+        return response_success()
+
+    def delete(self, request, task_id, *args, **kwargs):
+        """
+        停止任务循环执行
+        :param request:
+        :param task_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        task = Task.objects.filter(id=task_id).first()
+        if not task:
+            return response_failed(code=ErrorCode.task, message='数据不存在')
+        data = {
+            "interval_switch": False,
+            "days": 0,
+            "hours": 0,
+            "minutes": 0,
+            "start_time": None
+        }
+        Task.objects.filter(id=task_id).update(**data)
+
+        job = scheduler.get_job("task" + task_id)
+        if not job:
+            scheduler.remove_job("task" + task_id)
         return response_success()
 
 

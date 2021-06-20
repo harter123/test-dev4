@@ -1,0 +1,29 @@
+大纲：
+完成了任务模块的定时执行和循环执行
+
+
+我们做这个django的定时任务有很多方法，比较普遍应该的celery，虫师估计也是用这个。
+但是这个celery太重了，我这边就不建议用这个了，我选择的这个就是叫APScheduler
+
+http://www.chenxm.cc/article/829.html
+https://www.cnblogs.com/huangjiyong/p/12492281.html
+
+跟celery非常相似，但是非常轻量，我个人是非常喜欢这个
+
+1.安装模块
+
+pip install django-apscheduler
+
+2.配置
+INSTALLED_APPS中加入django-apscheduler应用
+  INSTALLED_APPS = [
+        ...
+        'django_apscheduler',
+        ...
+    ]
+
+3.数据库创建 python manage.py migrate
+django_apscheduler_djangojob：用于存储任务的表格  job_state: 我猜是将任务具体的执行代码和参数进行序列化后存在了这里
+django_apscheduler_djangojobexecution：用于存储任务执行状态的表格  status: 执行状态 duration: 执行了多长时间 exception: 是否出现了什么异常
+
+一个任务如果不用了，一定要需要删除掉

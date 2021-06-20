@@ -36,3 +36,10 @@ export const runTask = function (taskId) { //执行任务
 export const getTaskReports = function (taskId) { //执行任务
     return getRequest(`/backend/task/${taskId}/reports/`)
 };
+
+export const runIntervalTask = function (taskId, data) { //执行循环任务
+    return postRequest(`/backend/task/${taskId}/interval_run/`, data)
+};
+export const stopIntervalTask = function (taskId) { //暂停执行任务
+    return deleteRequest(`/backend/task/${taskId}/interval_run/`,)
+};

@@ -7,6 +7,12 @@ class Task(models.Model):
     name = models.CharField("name",max_length=255, null=False)
     description = models.TextField('描述')
 
+    days = models.IntegerField('days', null=True, default=0)
+    hours = models.IntegerField('hour', null=True, default=0)
+    minutes = models.IntegerField('minutes', null=True, default=0)
+    start_time = models.DateTimeField('start_time', null=True, default=None) #循环的开始时间
+    interval_switch = models.BooleanField('interval_switch', default=False) # 代表是否开启了循环执行
+
 
 class TaskTestCase(models.Model):
     # 任务和案例的关联表

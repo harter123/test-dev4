@@ -113,7 +113,39 @@
 
     <el-dialog title="执行管理" :visible.sync="taskRunDialogVisible" width="50%" style="margin-top: -50px">
       <div style="height: 500px;overflow-y: auto">
-        <el-button type="primary" plain @click="runTaskFun">执行</el-button>
+        <el-button type="primary" plain @click="runTaskFun">单次执行</el-button>
+        <el-button type="primary" plain @click="taskIntervalRunDialogVisible=true">循环执行</el-button>
+        <el-button type="info" plain @click="stopIntervalRunTask">停止循环执行</el-button>
+        <div v-if="taskIntervalRunDialogVisible" style="margin: 5px 0 5px 0">
+          <span>天</span>
+          <el-input-number size="mini"
+                           :min="0"
+                           v-model="currentTask.days"
+                           style="margin-right: 15px"></el-input-number>
+          <span>时</span>
+          <el-input-number size="mini"
+                           :min="0"
+                           v-model="currentTask.hours"
+                           style="margin-right: 15px"></el-input-number>
+          <span>分</span>
+          <el-input-number size="mini"
+                           :min="0"
+                           v-model="currentTask.minutes"></el-input-number>
+          <el-date-picker
+              style="margin: 5px 0"
+              size="mini"
+              v-model="currentTask.start_time"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="选择开始时间">
+          </el-date-picker>
+          <br/>
+          <el-button size="small" type="danger" plain @click="openIntervalRun">保存</el-button>
+          <el-button size="small" type="info" plain @click="taskIntervalRunDialogVisible=false">取消</el-button>
+        </div>
+        <div v-if="currentTask && currentTask.interval_switch">
+          你已开启循环执行：天 {{currentTask.days}}  时 {{currentTask.hours}}  分 {{currentTask.minutes}}，开始时间： {{currentTask.start_time}}
+        </div>
         <el-table
             :data="taskReportList"
             :header-cell-style="{'color': '#555555'}"
@@ -124,7 +156,7 @@
               label="名称"
               min-width="100%">
             <template slot-scope="scope">
-              <a href="javascript:void()" @click="openReportDetail(scope.row)">{{scope.row.name}}</a>
+              <a href="javascript:void(0)" @click="openReportDetail(scope.row)">{{scope.row.name}}</a>
             </template>
           </el-table-column>
         </el-table>
@@ -141,7 +173,7 @@ import {
   deleteTask,
   deleteTaskTestCase,
   getTaskList, getTaskReports,
-  getTaskTestCaseList, runTask,
+  getTaskTestCaseList, runIntervalTask, runTask, stopIntervalTask,
   updateTask
 } from "@/request/task";
 import selectTestCase from "@/views/task/selectTestCase";
@@ -189,7 +221,8 @@ export default {
       currentTask: undefined,
       selectTaskTestCaseDialogVisible: false,
       taskRunDialogVisible: false,
-      taskReportList: []
+      taskReportList: [],
+      taskIntervalRunDialogVisible: false,
     }
   },
   components: {
@@ -345,6 +378,46 @@ export default {
     },
     openReportDetail(report){
       window.open(`http://localhost/backend/task/${this.currentTask.id}/report/${report.name}/`)
+    },
+    openIntervalRun(){
+      if(""===this.currentTask.start_time||null===this.currentTask.start_time){
+        this.$message.error('请输入开始时间');
+        return
+      }
+      let req = {
+        days: this.currentTask.days,
+        hours: this.currentTask.hours,
+        minutes: this.currentTask.minutes,
+        start_time: this.currentTask.start_time
+      }
+      runIntervalTask(this.currentTask.id, req).then(rsp=>{
+        let success = rsp.data.success;
+        if(true===success){
+          this.$message('开启循环执行成功');
+          console.log("开启循环执行")
+          this.currentTask.days = req.days;
+          this.currentTask.hours = req.hours;
+          this.currentTask.minutes = req.minutes;
+          this.currentTask.start_time = req.start_time;
+          this.currentTask.interval_switch = true;
+        }
+      }).catch(()=>{
+      })
+    },
+    stopIntervalRunTask(){
+      stopIntervalTask(this.currentTask.id).then(rsp=>{
+        let success = rsp.data.success;
+        if(true===success){
+          this.$message('停止循环执行成功');
+          console.log("停止循环执行")
+          this.currentTask.days = 0;
+          this.currentTask.hours = 0;
+          this.currentTask.minutes = 0;
+          this.currentTask.start_time = null;
+          this.currentTask.interval_switch = false;
+        }
+      }).catch(()=>{
+      })
     }
   },
   created() {
