@@ -1,0 +1,134 @@
+大纲
+1.完成定时任务的执行
+2.部署打包
+
+
+
+
+因为window不支持uwsgi,所以就没法演示，只能使用开发版的启动方式：
+启动django
+     python manage.py runserver
+
+在linux上面部署：
+
+pip install uwsgi 安装uwsgi
+
+uwsgi的部署：
+uwsgi --http :8000 --chdir 项目的路径 --wsgi-file 项目路径/项目名称/wsgi.py --master --processes 4 --threads 2
+
+部署了这个，就不再需要执行： python manage.py runserver
+
+
+用uwsgi有很多好处，
+第一个性能好，支持多进程多线程，但是开发版不支持的
+第二个，能够进行性能分析，能够知道请求的统计个数，各种负载均衡，各种的资源使用情况，例如cpu，内存等等
+第三个，日志，web统计页面，都支持的
+是一个比较全面性的执行和分析工具来的
+
+https://uwsgi-docs-zh.readthedocs.io/zh_CN/latest/
+
+
+
+打包vue： npm run build  完成后可以在目录里面找到一个dist目录，这个就是静态文件
+为什么要打包vue，打包是什么样的操作？
+
+
+
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    server {
+        listen       80;
+        server_name  localhost, 127.0.0.1;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+		
+		root  C:/classes/test-dev4/itest_project/itest_front/dist;
+		index index.html index.htm;
+
+		keepalive_timeout   70;
+		
+		gzip on;
+		gzip_min_length 200;
+		gzip_buffers 4 16k;
+		gzip_comp_level 6;
+		gzip_types text/plain application/javascript text/css application/xml text/javascript application/json;
+		gzip_vary on;
+		gzip_disable "MSIE [1-6]\.";
+		gzip_proxied any;
+		
+		# 配置django
+		location /backend/ {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_pass_request_headers      on;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+		
+		
+		# 配置vue
+        location /css/ {
+            alias C:/classes/test-dev4/itest_project/itest_front/dist/css/;
+            expires 7d;
+        }
+		location /js/ {
+            alias C:/classes/test-dev4/itest_project/itest_front/dist/js/;
+            expires 7d;
+        }
+		location /fonts/ {
+            alias C:/classes/test-dev4/itest_project/itest_front/dist/fonts/;
+            expires 7d;
+        }
+		location /img/ {
+            alias C:/classes/test-dev4/itest_project/itest_front/dist/img/;
+            expires 7d;
+        }
+		
+		
+        location @tech-support-index {
+            add_header Cache-Control no-cache;
+            expires 10;
+            root C:/classes/test-dev4/itest_project/itest_front/dist/;
+            try_files /index.html =404;
+        }
+        location / {
+            root C:/classes/test-dev4/itest_project/itest_front/dist/;
+            autoindex on;
+            try_files $uri @tech-support-index;
+        }
+    }
+
+
+}

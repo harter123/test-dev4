@@ -266,11 +266,11 @@ class TaskIntervalRunTestCasesView(View):
             data['interval_switch'] = True
             Task.objects.filter(id=task_id).update(**data)
 
-        job = scheduler.get_job("task"+task_id)
-        if not job:
-            scheduler.remove_job("task" + task_id)
+        job = scheduler.get_job("task"+ str(task_id))
+        if job:
+            scheduler.remove_job("task" + str(task_id))
 
-        scheduler.add_job(run_task_common, 'interval', args=[task_id], days=data["days"], hours=data["hours"], minutes=data["minutes"], start_date=data["start_time"], id="task"+task_id)
+        scheduler.add_job(run_task_common, 'interval', args=[task_id], days=data["days"], hours=data["hours"], minutes=data["minutes"], start_date=data["start_time"], id="task"+str(task_id))
         return response_success()
 
     def delete(self, request, task_id, *args, **kwargs):
@@ -294,9 +294,9 @@ class TaskIntervalRunTestCasesView(View):
         }
         Task.objects.filter(id=task_id).update(**data)
 
-        job = scheduler.get_job("task" + task_id)
-        if not job:
-            scheduler.remove_job("task" + task_id)
+        job = scheduler.get_job("task" + str(task_id))
+        if job:
+            scheduler.remove_job("task" + str(task_id))
         return response_success()
 
 
